@@ -41,4 +41,5 @@ else
 	echo "Usage: $me <host|ip> <port> [-full]"
 	echo ""
 fi
+
 #EOF

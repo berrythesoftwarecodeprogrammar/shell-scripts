@@ -1,0 +1,29 @@
+#!/bin/bash
+# `sshfp' for lunix
+# (c) brr 20160228-2224 [berr.yt]
+##
+me=`basename $0`
+if [ -n "$1" ] && [ -n "$2" ]; then
+		host=$1
+		port=$2
+		file=$(mktemp)
+		ssh-keyscan -p $port $host > $file 2> /dev/null
+	if [[ -s $file ]]; then
+		if [ -n "$3" ] && [ "$3" == "-full" ]; then
+			cat $file
+		fi
+			echo "# $host:$port SSH Fingerprints:"
+			ssh-keygen -l -E md5 -f $file
+			ssh-keygen -l -E sha1 -f $file
+			ssh-keygen -l -E sha256 -f $file
+			ssh-keygen -l -E sha512 -f $file
+	else
+		echo "Unable to connect. Maybe this port has no SSH"
+	fi
+		rm $file
+else
+		echo "Usage: $me <host|ip> <port> [-full]"
+		echo ""
+fi
+
+#EOF
