@@ -1,0 +1,44 @@
+#!/bin/bash
+# `sslfp' for lunix
+# (c) brr 20160228-2156 [berr.yt]
+##
+me=`basename $0`
+if [ -n "$1" ] && [ -n "$2" ]; then
+	host=$1
+	port=$2
+	ip=0
+	if [[ $host =~ [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]] || [[ $host =~ [0-9:]+ ]]; then
+		ip=1
+		if [ -n "$3" ] && [ "$3" == "-full" ]; then
+			out=`openssl s_client -showcerts -connect [$host]:$port < /dev/null`
+		else
+			out=`openssl s_client -showcerts -connect [$host]:$port 2>&-`
+		fi	
+	else
+		if [ -n "$3" ] && [ "$3" == "-full" ]; then
+			out=`openssl s_client -showcerts -servername $host -connect $host:$port < /dev/null`
+		else	
+			out=`openssl s_client -showcerts -servername $host -connect $host:$port 2>&-`
+		fi
+	fi
+	if [ -n "$out" ]; then
+		if [ -n "$3" ] && [ "$3" == "-full" ]; then
+			echo "$out\n"
+		fi
+		if [ $ip -eq 1 ]; then
+			echo "# [$host]:$port TLS Fingerprints:"
+		else
+			echo "# $host:$port TLS Fingerprints:"
+		fi
+		echo "$out" | openssl x509 -md5 -fingerprint -noout
+		echo "$out" | openssl x509 -sha1 -fingerprint -noout
+		echo "$out" | openssl x509 -sha256 -fingerprint -noout
+		echo "$out" | openssl x509 -sha512 -fingerprint -noout
+	else
+		echo "Unable to connect. Maybe this port has no TLS"
+	fi
+else
+	echo "Usage: $me <host|ip> <port> [-full]"
+	echo ""
+fi
+#EOF
